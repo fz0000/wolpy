@@ -39,12 +39,13 @@ def sendMagicPacket(mac, ip, port):
     payload = bytearray.fromhex(magicpattern)
 
     # Open an UDP socket and allow broadcasts
-    s = socket.socket(socktype, socket.SOCK_DGRAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-
-    # Send and close
-    s.sendto(payload, (ip.compressed, port))
-    s.close()
+    with socket.socket(socktype, socket.SOCK_DGRAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        # Send and close
+        try:
+            s.sendto(payload, (ip.compressed, port))
+        except socket.error as e:
+            raise RuntimeError(f"Failed to send packet: {e}")
     
 
 def macAddress(value):
